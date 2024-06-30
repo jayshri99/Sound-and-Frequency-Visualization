@@ -13,17 +13,16 @@ import os
 
 app = dash.Dash(__name__)
 
-# Assuming the files are structured under a main directory named 'emotions'
 BASE_DIR = 'emotions'
 
-def get_audio_path(emotion, sentence):
+def get_audio_path(emotion, sentence): #Constructs the file path for a given emotion and sentence.
     return os.path.join(BASE_DIR, emotion, f"{sentence}.wav")
 
-def compute_stft(audio_path):
+def compute_stft(audio_path): #Loads an audio file and computes its Short-Time Fourier Transform (STFT)
     audio, sr = librosa.load(audio_path)
     return np.abs(librosa.stft(audio))
 
-def apply_dtw(stft_audio1, stft_audio2):
+def apply_dtw(stft_audio1, stft_audio2): #Applies Dynamic Time Warping (DTW) to align two STFT representations and resamples the second audio to match the time frames of the first.
     distance, path = fastdtw(stft_audio1.T, stft_audio2.T, dist=euclidean)
     path = np.array(path)
     path_audio2 = path[:, 1]
@@ -45,13 +44,13 @@ def apply_dtw(stft_audio1, stft_audio2):
 
     return resampled_audio2
 
-def generate_spectrogram_figure(stft_data, title):
+def generate_spectrogram_figure(stft_data, title): #Creates a spectrogram plot from STFT data.
     db_stft = librosa.amplitude_to_db(stft_data, ref=np.max)
     fig = px.imshow(db_stft, aspect='auto', color_continuous_scale='viridis', origin='lower')
     fig.update_layout(title=title, xaxis_title='Time', yaxis_title='Frequency', coloraxis_colorbar=dict(title='dB'))
     return fig
 
-def generate_wave_figure(sound1_path, sound2_path, title):
+def generate_wave_figure(sound1_path, sound2_path, title): #Generates a time-domain waveform comparison between two audio files.
     sound1, _ = librosa.load(sound1_path)
     sound2, _ = librosa.load(sound2_path)
     
@@ -74,7 +73,7 @@ def generate_wave_figure(sound1_path, sound2_path, title):
 
     return fig
 
-def get_pitch_data(audio_path, audio_label):
+def get_pitch_data(audio_path, audio_label): #Extracts pitch data from an audio file and prepares it for visualization.
     # Load the audio file
     y, sr = librosa.load(audio_path)
     
